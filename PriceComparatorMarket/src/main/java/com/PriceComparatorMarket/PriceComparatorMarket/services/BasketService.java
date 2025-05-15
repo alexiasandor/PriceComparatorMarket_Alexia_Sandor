@@ -24,7 +24,6 @@ public class BasketService {
     private final ProductRepository productRepository;
     private final DiscountRepository discountRepository;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasketRepository.class);
     @Autowired
     public BasketService( BasketRepository basketRepository, ProductRepository productRepository, DiscountRepository discountRepository){
         this.basketRepository = basketRepository;
@@ -106,8 +105,7 @@ public class BasketService {
     private List<Product> applyAllDiscounts(Product product, LocalDate basketDate) {
         List<Product> results = new ArrayList<>();
 
-        // Adăugăm produsul original (fără reducere)
-        results.add(product);
+        results.add(product); // add original product
 
         List<Discount> discounts = discountRepository
                 .findByIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(
@@ -120,7 +118,6 @@ public class BasketService {
             double percent = discount.getPercentageOfDiscount();
             double reducedPrice = product.getPrice() * (1 - percent / 100.0);
 
-            // rotunjim la 2 zecimale
             reducedPrice = Math.round(reducedPrice * 100.0) / 100.0;
 
             copy.setPrice((float) reducedPrice);
@@ -195,13 +192,17 @@ public class BasketService {
                 .build();
 
 
-
         basketRepository.save(basket);
 
         return BasketBuilder.fromEntityToDto(basket);
 
     }
 
+    /**
+     *  Method for first feature - optimize the basket
+     * @param basketId - id of the basket we want to ptimize
+     * @return
+     */
     public String  optimizeBasket(int basketId) {
         Basket basket = getBasketById(basketId); // get current basket
         LocalDate basketDate = basket.getDate(); // extract date
@@ -212,11 +213,11 @@ public class BasketService {
         List<Product> optimizedProductList = new ArrayList<>();
 
         for (Product product : basket.getProductList()) {
-            List<Product> variants = getAlternativeForProduct(product.getProductName(), referenceDate);
+            List<Product> alternativeProductList = getAlternativeForProduct(product.getProductName(), referenceDate); // find alternative
 
             List<Product> allVariantsWithDiscounts = new ArrayList<>();
-            for (Product variant : variants) {
-                allVariantsWithDiscounts.addAll(applyAllDiscounts(variant, basketDate));
+            for (Product p : alternativeProductList) {
+                allVariantsWithDiscounts.addAll(applyAllDiscounts(p, basketDate));
             }
 
             Product best = chooseBestProduct(allVariantsWithDiscounts);

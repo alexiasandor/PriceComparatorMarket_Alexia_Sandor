@@ -21,7 +21,6 @@ import java.util.Map;
 
 public class BasketController {
     private final BasketService basketService;
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasketRepository.class);
 @Autowired
     public BasketController(BasketService basketService){
     this.basketService = basketService;
