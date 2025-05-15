@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -38,4 +39,6 @@ public class Discount {
     private int percentageOfDiscount;
     @Column(name= "storeName", nullable = false)
     private String storeName;
+    @Column(name= "creationDay", nullable = false)
+    private LocalDateTime creationDay;
 }

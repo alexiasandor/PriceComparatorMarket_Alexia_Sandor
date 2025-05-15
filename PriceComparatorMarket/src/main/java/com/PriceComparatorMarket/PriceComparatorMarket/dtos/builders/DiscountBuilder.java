@@ -17,6 +17,7 @@ public class DiscountBuilder {
                 .toDate(discountDto.getToDate())
                 .percentageOfDiscount(discountDto.getPercentageOfDiscount())
                 .storeName(discountDto.getStoreName())
+                .creationDay(discountDto.getCreationDay())
                 .build();
     }
 
@@ -33,6 +34,7 @@ public class DiscountBuilder {
                 .toDate(discount.getToDate())
                 .percentageOfDiscount(discount.getPercentageOfDiscount())
                 .storeName(discount.getStoreName())
+                .creationDay(discount.getCreationDay())
                 .build();
     }
 }

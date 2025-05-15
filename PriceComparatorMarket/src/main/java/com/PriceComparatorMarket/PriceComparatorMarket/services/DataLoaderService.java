@@ -13,7 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class DataLoaderService {
@@ -111,6 +113,20 @@ public class DataLoaderService {
                     d.setToDate(LocalDate.parse(t[7]));
                     d.setPercentageOfDiscount(Integer.parseInt(t[8].trim()));
                     d.setStoreName(store);
+
+                    // Generate random date and hour
+                    Random rand = new Random();
+                    LocalDate minDate = LocalDate.of(2025, 5, 1);
+                    LocalDate maxDate = fromDate.minusDays(1);
+
+                    long rawDaysBetween = ChronoUnit.DAYS.between(minDate, maxDate);
+                    long daysBetween = Math.max(0, rawDaysBetween);          // nu va fi niciodată negativ
+                    long offset = rand.nextLong(daysBetween + 1);            // bound >= 1
+
+                    LocalDate randomDate = minDate.plusDays(offset);
+                    int hour    = rand.nextInt(24);
+                    int minute  = rand.nextInt(60);;
+                    d.setCreationDay(randomDate.atTime(hour, minute)); // to "create" the day the discount was created
 
                     discountRepository.save(d);
                 }
