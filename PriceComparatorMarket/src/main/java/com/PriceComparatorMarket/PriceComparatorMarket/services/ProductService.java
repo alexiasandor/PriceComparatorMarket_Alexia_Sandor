@@ -2,6 +2,7 @@ package com.PriceComparatorMarket.PriceComparatorMarket.services;
 
 import com.PriceComparatorMarket.PriceComparatorMarket.dtos.DataPointDto;
 import com.PriceComparatorMarket.PriceComparatorMarket.dtos.HistoryGraphsDto;
+import com.PriceComparatorMarket.PriceComparatorMarket.dtos.PricePerUnitRequest;
 import com.PriceComparatorMarket.PriceComparatorMarket.dtos.ProductDto;
 import com.PriceComparatorMarket.PriceComparatorMarket.dtos.builders.DataPointBuilder;
 import com.PriceComparatorMarket.PriceComparatorMarket.dtos.builders.ProductBuilder;
@@ -26,18 +27,20 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final DiscountRepository discountRepository;
 
-     @Autowired
+    @Autowired
     public ProductService(ProductRepository productRepository, DiscountRepository discountRepository) {
         this.productRepository = productRepository;
         this.discountRepository = discountRepository;
 
     }
-    public ProductDto insertProduct(ProductDto productDto){
+
+    public ProductDto insertProduct(ProductDto productDto) {
 
         Product product = ProductBuilder.fromDtoToEntity(productDto);
         productRepository.save(product);
         return ProductBuilder.fromEntityToDto(product);
     }
+
     private float roundTwoDecimals(float value) {
         return Math.round(value * 100.0f) / 100.0f;
     }
@@ -45,10 +48,11 @@ public class ProductService {
 
     /**
      * Helper function to calculate de price with or without discount
+     *
      * @param product - the product for which we calculate the price
      * @return
      */
-    public float applyDiscount(Product product){
+    public float applyDiscount(Product product) {
         // extract the day when the product is available to apply the correct discount
         LocalDate productDay = product.getDate();
         String productId = product.getProductId();
@@ -58,7 +62,7 @@ public class ProductService {
         System.out.println("Date: " + productDay);
         //search available discounts
         List<Discount> availableDiscounts = discountRepository.findByProductId(
-                        product.getProductId());
+                product.getProductId());
 
         if (availableDiscounts.isEmpty()) {
             System.out.println("No discounts found for product ID: " + productId);
@@ -92,12 +96,13 @@ public class ProductService {
 
     /**
      * This helper method filters products based on optional request parameters
+     *
      * @param historyGraphs - the request which contain filters
-     * @param startDate -start date for OX axis
+     * @param startDate     -start date for OX axis
      * @return a JPA Specification with all applicable filters
      */
-    public Specification<Product> helperToGetHistoryGraphs(HistoryGraphsDto historyGraphs, LocalDateTime startDate){
-        return (root, query, criteriaBuilder)->{
+    public Specification<Product> helperToGetHistoryGraphs(HistoryGraphsDto historyGraphs, LocalDateTime startDate) {
+        return (root, query, criteriaBuilder) -> {
             // list to save all filter conditions- it is like a list of conditions based on parameters from request
             List<Predicate> listOfPredicates = new ArrayList<>();
 
@@ -124,13 +129,14 @@ public class ProductService {
 
     /**
      * This method generates price history points for a given product with or withouth filters
+     *
      * @param historyGraphsDto - request body
      * @return a list of DataPoints which contains price and data
      */
-    public List<DataPointDto> getHistoryGraphs(HistoryGraphsDto historyGraphsDto){
-         // select the time range for ox axis
+    public List<DataPointDto> getHistoryGraphs(HistoryGraphsDto historyGraphsDto) {
+        // select the time range for ox axis
         LocalDateTime startDate = LocalDateTime.of(2025, 5, 1, 0, 0, 0);
-        Specification<Product> filteredProducts = helperToGetHistoryGraphs(historyGraphsDto,startDate);
+        Specification<Product> filteredProducts = helperToGetHistoryGraphs(historyGraphsDto, startDate);
         List<Product> finalListOfProducts = productRepository.findAll(filteredProducts);
         List<DataPointDto> listOfResults = new ArrayList<>();
 
@@ -142,5 +148,30 @@ public class ProductService {
         }
 
         return listOfResults;
+    }
+
+    /**
+     * This method
+     *
+     * @param pricePerUnitRequest request which contain the name of product
+     * @return List of products with price per unit
+     */
+    public String getPricePerUnit(PricePerUnitRequest pricePerUnitRequest) {
+
+        String currentProductName = pricePerUnitRequest.getProductName();
+        List<Product> listOfProducts = productRepository.findByProductName(currentProductName);
+        if (listOfProducts.isEmpty()) {
+            return "No products found with name: " + currentProductName;
+        }
+        String result = "List of products with price per unit for: " + currentProductName +"\n";
+        for (Product product : listOfProducts) {
+            float unitValue = product.getPrice() / product.getPackageQuantity();
+            result += "- " + product.getProductName() +
+                    " from " + product.getStoreName() +
+                    ": " + String.format("%.2f RON/%s", unitValue, product.getPackageUnit()) +
+                    " (valid from" + product.getDate() + ")\n";
+
+        }
+        return result;
     }
 }

@@ -14,6 +14,6 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     Optional<Product> findByProductNameAndBrandAndStoreNameAndDate(String name, String brand, String store, LocalDate date);
     List<Product> findByProductNameAndDate(String productName, LocalDate date);
     boolean existsByProductIdAndDateAndStoreName(String productId, LocalDate date, String storeName);
-
+    List<Product> findByProductName(String name);
 
 }

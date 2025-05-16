@@ -1,9 +1,6 @@
 package com.PriceComparatorMarket.PriceComparatorMarket.controllers;
 
-import com.PriceComparatorMarket.PriceComparatorMarket.dtos.DataPointDto;
-import com.PriceComparatorMarket.PriceComparatorMarket.dtos.DiscountDto;
-import com.PriceComparatorMarket.PriceComparatorMarket.dtos.HistoryGraphsDto;
-import com.PriceComparatorMarket.PriceComparatorMarket.dtos.ProductDto;
+import com.PriceComparatorMarket.PriceComparatorMarket.dtos.*;
 import com.PriceComparatorMarket.PriceComparatorMarket.services.ProductService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,5 +31,10 @@ public class ProductController {
     public ResponseEntity<List<DataPointDto>> getHistoryGraphs(@RequestBody HistoryGraphsDto historyGraphsDto){
         List<DataPointDto> dataPointDto = productService.getHistoryGraphs(historyGraphsDto);
         return ResponseEntity.ok(dataPointDto);
+    }
+    @PostMapping("/pricePerUnit")
+    public ResponseEntity<String> getPricePerUnit(@RequestBody PricePerUnitRequest pricePerUnitRequest){
+        String result = productService.getPricePerUnit(pricePerUnitRequest);
+        return ResponseEntity.ok(result);
     }
 }
