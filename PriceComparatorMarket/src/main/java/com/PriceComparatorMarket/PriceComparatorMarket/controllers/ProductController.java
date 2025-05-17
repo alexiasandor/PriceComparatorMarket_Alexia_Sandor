@@ -1,8 +1,8 @@
 package com.PriceComparatorMarket.PriceComparatorMarket.controllers;
 
 import com.PriceComparatorMarket.PriceComparatorMarket.dtos.*;
+import com.PriceComparatorMarket.PriceComparatorMarket.services.PriceAlertService;
 import com.PriceComparatorMarket.PriceComparatorMarket.services.ProductService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,10 +15,12 @@ import java.util.List;
 
 public class ProductController {
 
-    private ProductService productService;
+    private final ProductService productService;
+    private final PriceAlertService priceAlertService;
     @Autowired
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, PriceAlertService priceAlertService) {
         this.productService = productService;
+        this.priceAlertService = priceAlertService;
     }
 
     @PostMapping("/insertProduct")
@@ -36,5 +38,11 @@ public class ProductController {
     public ResponseEntity<String> getPricePerUnit(@RequestBody PricePerUnitRequest pricePerUnitRequest){
         String result = productService.getPricePerUnit(pricePerUnitRequest);
         return ResponseEntity.ok(result);
+    }
+    @PostMapping("/updatePrice")
+    public ResponseEntity<String> updateProductPrice(@RequestBody ProductPriceUpdateRequest productPriceUpdateRequest){
+        String result = productService.updatePrice(productPriceUpdateRequest);
+        priceAlertService.priceAlert(productPriceUpdateRequest);
+       return ResponseEntity.ok(result);
     }
 }

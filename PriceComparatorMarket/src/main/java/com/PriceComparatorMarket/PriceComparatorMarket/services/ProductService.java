@@ -1,9 +1,6 @@
 package com.PriceComparatorMarket.PriceComparatorMarket.services;
 
-import com.PriceComparatorMarket.PriceComparatorMarket.dtos.DataPointDto;
-import com.PriceComparatorMarket.PriceComparatorMarket.dtos.HistoryGraphsDto;
-import com.PriceComparatorMarket.PriceComparatorMarket.dtos.PricePerUnitRequest;
-import com.PriceComparatorMarket.PriceComparatorMarket.dtos.ProductDto;
+import com.PriceComparatorMarket.PriceComparatorMarket.dtos.*;
 import com.PriceComparatorMarket.PriceComparatorMarket.dtos.builders.DataPointBuilder;
 import com.PriceComparatorMarket.PriceComparatorMarket.dtos.builders.ProductBuilder;
 import com.PriceComparatorMarket.PriceComparatorMarket.entities.Discount;
@@ -20,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +30,11 @@ public class ProductService {
         this.productRepository = productRepository;
         this.discountRepository = discountRepository;
 
+    }
+    private LocalDate resolveReferenceDate(LocalDate date) {
+        return date.isBefore(LocalDate.of(2025, 5, 8))
+                ? LocalDate.of(2025, 5, 1)
+                : LocalDate.of(2025, 5, 8);
     }
 
     public ProductDto insertProduct(ProductDto productDto) {
@@ -173,5 +176,22 @@ public class ProductService {
 
         }
         return result;
+    }
+
+    public String updatePrice(ProductPriceUpdateRequest productPriceUpdateRequest){
+        LocalDate referenceDate = resolveReferenceDate(productPriceUpdateRequest.getDate());
+
+        // search for the product whose price we want to update, product which is available when we send the request
+        Optional<Product> currentProduct = productRepository.findByProductNameAndBrandAndStoreNameAndDate(productPriceUpdateRequest.getProductName(), productPriceUpdateRequest.getBrand(), productPriceUpdateRequest.getStoreName(), referenceDate);
+
+        if (currentProduct.isEmpty()){
+            return  "Product was not found";
+        }
+        // update the price and save
+        Product updatedProduct = currentProduct.get();
+        updatedProduct.setPrice(productPriceUpdateRequest.getNewPrice());
+        productRepository.save(updatedProduct);
+
+     return "Price updated successfully for product " + updatedProduct.getProductName() ;
     }
 }
