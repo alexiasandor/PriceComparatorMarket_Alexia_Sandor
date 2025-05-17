@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class DiscountService {
@@ -23,17 +24,28 @@ public class DiscountService {
         this.discountRepository = discountRepository;
     }
 
+    /**
+     * This method creates a new discount
+     * @param discountDto - request with appropriate fields to create a new discount
+     * @return the new discount
+     */
     public DiscountDto insertDiscount(DiscountDto discountDto){
 
         Discount discount = DiscountBuilder.fromDtoToEntity(discountDto);
         discountRepository.save(discount);
         return DiscountBuilder.fromEntityToDto(discount);
     }
+
+    /**
+     * This method returns a list sorted in descending order by discount percentage
+     * @param date date for which to retrieve active discounts
+     * @return listing with the  best available discounts on the specified date
+     */
     public String getBestDiscounts(LocalDate date){
     // find all the active discounts from the current day
     List<Discount> activeDiscountsList = discountRepository.findByFromDateLessThanEqualAndToDateGreaterThanEqual(date, date);
 
-       // keep the newer discount
+       // keep the newer discount for every product
         Map<String, Discount> bestDiscounts = new HashMap<>();
 
         for (Discount d : activeDiscountsList) {
@@ -48,19 +60,27 @@ public class DiscountService {
             }
         }
          // return as string
-        StringBuilder sb = new StringBuilder("Best discounts for: ").append(date).append("\n\n");
-
-        bestDiscounts.values().stream()
+        String discountsReport = bestDiscounts.values().stream()
                 .sorted(Comparator.comparingInt(Discount::getPercentageOfDiscount).reversed())
-                .forEach(d -> sb.append(" ")
-                        .append(d.getProductName()).append(" (").append(d.getBrand()).append(") - ")
-                        .append(d.getStoreName()).append(" → ")
-                        .append(d.getPercentageOfDiscount()).append("%\n")
-                );
+                .map(d -> String.format(" %s (%s) - %s → %d%% [from %s to %s]",
+                        d.getProductName(),
+                        d.getBrand(),
+                        d.getStoreName(),
+                        d.getPercentageOfDiscount(),
+                        d.getFromDate(),
+                        d.getToDate()))
+                .collect(Collectors.joining("\n"));
 
-        return sb.toString();
+        return String.format("Best discounts for: %s\n\n%s", date, discountsReport);
+
     }
 
+    /**
+     * This method returns a list of all discounts that were added in the last 24 hours
+     * If no new discounts are found, a message indicating this is returned
+     * @param currentDateTime  date and time used as the upper limit
+     * @return string listing newly added discounts within the last 24 hours
+     */
     public String getNewlyAdded(LocalDateTime currentDateTime) {
         //we get the date 24 hours ago the current one
         LocalDateTime daily = currentDateTime.minusHours(24);
@@ -71,15 +91,14 @@ public class DiscountService {
             return " No discounts were added between " + daily + " and " + currentDateTime + ".";
         }
 
-        StringBuilder sb = new StringBuilder("Discounts added in the last 24h before " + currentDateTime + ":\n\n");
+        String discountDetails = newDiscounts.stream()
+                .map(d -> String.format(" %s (%s) - %s: %d%% off",
+                        d.getProductName(),
+                        d.getBrand(),
+                        d.getStoreName(),
+                        d.getPercentageOfDiscount()))
+                .collect(Collectors.joining("\n"));
 
-        for (Discount d : newDiscounts) {
-            sb.append(" ")
-                    .append(d.getProductName()).append(" (").append(d.getBrand()).append(") - ")
-                    .append(d.getStoreName()).append(": ")
-                    .append(d.getPercentageOfDiscount()).append("% off\n");
-        }
-
-        return sb.toString();
+        return String.format("Discounts added in the last 24h before %s:\n\n%s", currentDateTime, discountDetails);
     }
 }

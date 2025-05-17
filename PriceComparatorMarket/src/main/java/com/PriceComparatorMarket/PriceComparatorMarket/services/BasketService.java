@@ -33,18 +33,21 @@ public class BasketService {
 
     /**
      * This method return a basket by id
-     * @param basketId
-     * @return
+     * @param basketId - id of the basket
+     * @return Basket-object or runTimeException message if the basket is not find
      */
     private Basket getBasketById(int basketId) {
-        return basketRepository.findById(basketId)
-                .orElseThrow(() -> new RuntimeException("Basket not found"));
+        Optional<Basket> optionalBasket = basketRepository.findById(basketId);
+        if (optionalBasket.isEmpty()) {
+            throw new RuntimeException("Basket with ID " + basketId + " was not found.");
+        }
+        return optionalBasket.get();
     }
 
     /**
      * Helper method to find in which day-category we fit
-     * @param date
-     * @return
+     * @param date- curent date
+     * @return the period in which we fall: before 08-05 or after
      */
     private LocalDate resolveReferenceDate(LocalDate date) {
         return date.isBefore(LocalDate.of(2025, 5, 8))
@@ -54,9 +57,9 @@ public class BasketService {
 
     /**
      * Helper method to find a product by name day it fits in
-     * @param productName
-     * @param date
-     * @return
+     * @param productName - name of the product we are searching for
+     * @param date - date when the product is available
+     * @return list of product which are a good alternative
      */
     private List<Product> getAlternativeForProduct(String productName, LocalDate date) {
         return productRepository.findByProductNameAndDate(productName, date);
@@ -65,8 +68,8 @@ public class BasketService {
 
     /**
      * Hepler method to create raport : quantity-price
-     * @param products
-     * @return
+     * @param products - list of products
+     * @return the product with the lowest price per unit
      */
     private Product chooseBestProduct(List<Product> products) {
         return products.stream()
@@ -76,8 +79,8 @@ public class BasketService {
 
     /**
      * Update basket
-     * @param basket
-     * @param optimizedProductList
+     * @param basket - current basket
+     * @param optimizedProductList - list with optimized products
      */
     private Basket updateBasketWithOptimizedProducts(Basket basket, List<Product> optimizedProductList) {
         basket.setProductList(optimizedProductList);
@@ -128,70 +131,80 @@ public class BasketService {
         return results;
     }
 
-    private String formatBasketMessage(Map<String, List<Product>> grouped, LocalDate date, List<Product> originalListOfProducts, float basketPrice) {
-        StringBuilder sb = new StringBuilder("Unoptimized basket for :\n");
-        for (Product p : originalListOfProducts) {
-            sb.append("- ")
-                    .append(p.getStoreName()).append(": ")
-                    .append(p.getProductName()).append(" (").append(p.getBrand()).append("), ")
-                    .append(p.getPrice()).append(" ")
-                    .append(p.getCurrency());
-        }
+    /**
+     *This method is a helper to format the messages we return
+     */
+    private String formatBasketMessage(Map<String, List<Product>> grouped, LocalDate date, List<Product> originalListOfProducts, float newBasketPrice, float oldBasketPrice) {
+        String result = "Unoptimized basket for:\n";
 
-        sb.append("\n Optimized basket for data: ").append(date).append(":\n");
+        for (Product p : originalListOfProducts) {
+            result += "- " + p.getStoreName() + ": " +
+                    p.getProductName() + " (" + p.getBrand() + "), " +
+                    String.format("%.2f", p.getPrice()) + " " + p.getCurrency() + "\n";
+        }
+        result += "\nUnoptimized basket value : " + String.format("%.2f RON", oldBasketPrice) + "\n";
+
+        result += "\nOptimized basket for date: " + date + ":\n";
         for (Map.Entry<String, List<Product>> entry : grouped.entrySet()) {
-            sb.append("- ").append(entry.getKey()).append(": ");
+            result += "- " + entry.getKey() + ": ";
 
             String productsLine = entry.getValue().stream()
                     .map(p -> p.getProductName() + " (" + p.getBrand() + "), " +
                             String.format("%.2f", p.getPrice()) + " RON")
                     .collect(Collectors.joining(" | "));
 
-            sb.append(productsLine).append("\n");
+            result += productsLine + "\n";
         }
-
-
-        sb.append("\n Basket value : ").append(String.format("%.2f RON", basketPrice));
-
-        return sb.toString();
+        result += "Optimized basket value : " + String.format("%.2f RON", newBasketPrice);
+        return result;
     }
-
-    /**
-     * This method create a basket
-     * @param request
-     * @return
-     */
-    public BasketDto createBasket(BasketCreateDto request) {
-        LocalDate basketDate = request.getDate();
-        LocalDate referenceDate = resolveReferenceDate(basketDate);
-
+    private List<Product> findProductsForRequest(BasketCreateDto request, LocalDate referenceDate) {
         List<Product> products = new ArrayList<>();
 
         for (BasketCreateDto.BasketItemInput item : request.getProductList()) {
-            Optional<Product> p = productRepository.findByProductNameAndBrandAndStoreNameAndDate(
+            Optional<Product> product = productRepository.findByProductNameAndBrandAndStoreNameAndDate(
                     item.getProductName(),
                     item.getBrand(),
                     item.getStoreName(),
                     referenceDate
             );
-            if (p.isEmpty()) {
+
+            if (product.isEmpty()) {
                 System.out.println("Product not found: " + item.getProductName()
                         + " / " + item.getBrand() + " / " + item.getStoreName() + " / " + referenceDate);
             }
 
-            p.ifPresent(products::add); // if the product is found
+            product.ifPresent(products::add);
         }
-        float basketPrice = (float) products.stream()
+
+        return products;
+    }
+
+    /**
+     * This method calculates basket total price
+     * @param products list of products
+     * @return price
+     */
+    private float calculateBasketPrice(List<Product> products) {
+        return (float) products.stream()
                 .mapToDouble(Product::getPrice)
                 .sum();
+    }
 
-        Basket basket = Basket.builder()
-                .date(basketDate)
-                .basketPrice(basketPrice)
-                .productList(products)
-                .build();
+    /**
+     * This method create a basket
+     * @param request - request containing date and product list
+     * @return  the created baske
+     */
+    public BasketDto createBasket(BasketCreateDto request) {
+        LocalDate basketDate = request.getDate();
+        LocalDate referenceDate = resolveReferenceDate(basketDate);
+        //search products from request and save in a list
+        List<Product> products = findProductsForRequest(request, referenceDate);
+        //compute the price
+        float basketPrice = calculateBasketPrice(products);
 
-
+        Basket basket = BasketBuilder.buildBasket(basketDate, products, basketPrice);
         basketRepository.save(basket);
 
         return BasketBuilder.fromEntityToDto(basket);
@@ -201,37 +214,47 @@ public class BasketService {
     /**
      *  Method for first feature - optimize the basket
      * @param basketId - id of the basket we want to ptimize
-     * @return
+     * @return - returns a message with the contents of the cart divided into the shopping lists in each store
      */
     public String  optimizeBasket(int basketId) {
-        Basket basket = getBasketById(basketId); // get current basket
-        LocalDate basketDate = basket.getDate(); // extract date
-        LocalDate referenceDate = resolveReferenceDate(basketDate);
-
-        List<Product> originalProducts = new ArrayList<>(basket.getProductList()); // get the list of products from unoptimized basket
         Map<String, List<Product>> storeMap = new HashMap<>();
         List<Product> optimizedProductList = new ArrayList<>();
+        // get current basket
+        Basket basket = getBasketById(basketId);
+        float oldBasketPrice = basket.getBasketPrice();
+        System.out.println("old price " + oldBasketPrice);
+        // extract date
+        LocalDate basketDate = basket.getDate();
+        //the period in which we are related to the availability of products
+        LocalDate referenceDate = resolveReferenceDate(basketDate);
 
+        // get the list of products from unoptimized basket
+        List<Product> originalProducts = new ArrayList<>(basket.getProductList());
+
+
+        // find the best alternative for every product from list
         for (Product product : basket.getProductList()) {
-            List<Product> alternativeProductList = getAlternativeForProduct(product.getProductName(), referenceDate); // find alternative
-
+            // find all alternatives
+            List<Product> alternativeProductList = getAlternativeForProduct(product.getProductName(), referenceDate);
+            // apply discounts
             List<Product> allVariantsWithDiscounts = new ArrayList<>();
             for (Product p : alternativeProductList) {
                 allVariantsWithDiscounts.addAll(applyAllDiscounts(p, basketDate));
             }
-
+            // choose the best product
             Product best = chooseBestProduct(allVariantsWithDiscounts);
-
+            // add to the corresponding store list
             if (best != null) {
                 optimizedProductList.add(best);
                 storeMap.computeIfAbsent(best.getStoreName(), s -> new ArrayList<>()).add(best);
             }
         }
 
-
-        Basket newBasket = updateBasketWithOptimizedProducts(basket, optimizedProductList); // update current basket
+        // update current basket
+        Basket newBasket = updateBasketWithOptimizedProducts(basket, optimizedProductList);
         float basketPrice = newBasket.getBasketPrice();
-        return formatBasketMessage(storeMap, basketDate, originalProducts, basketPrice);
+        // returns a message with the contents of the cart divided into the shopping lists in each store
+        return formatBasketMessage(storeMap, basketDate, originalProducts, basketPrice, oldBasketPrice);
     }
 
 

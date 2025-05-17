@@ -23,6 +23,5 @@ public class DiscountDto {
     private LocalDate toDate;
     private int percentageOfDiscount;
     private String storeName;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime creationDay;
 }

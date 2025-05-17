@@ -23,6 +23,11 @@ public class PriceAlertService {
         this.priceAlertRepository = priceAlertRepository;
     }
 
+    /**
+     * This method creates a new alert
+     * @param priceAlertRequestDto alert details used to create a new one
+     * @return return a confirmation message
+     */
     public String createPriceAlert(PriceAlertRequestDto priceAlertRequestDto){
       //extract user using its id
         int currentUserId = priceAlertRequestDto.getUserId();
@@ -36,7 +41,11 @@ public class PriceAlertService {
     }
 
 
-
+    /**
+     * This method check the new price (updated grant price any alerts)
+     * and send a message to the user who set that alert
+     * @param productPriceUpdateRequest - request details
+     */
     public void priceAlert(ProductPriceUpdateRequest productPriceUpdateRequest){
        float newPriceForProduct = productPriceUpdateRequest.getNewPrice();
       //search if we find the product in alert list

@@ -120,8 +120,8 @@ public class DataLoaderService {
                     LocalDate maxDate = fromDate.minusDays(1);
 
                     long rawDaysBetween = ChronoUnit.DAYS.between(minDate, maxDate);
-                    long daysBetween = Math.max(0, rawDaysBetween);          // nu va fi niciodată negativ
-                    long offset = rand.nextLong(daysBetween + 1);            // bound >= 1
+                    long daysBetween = Math.max(0, rawDaysBetween);
+                    long offset = rand.nextLong(daysBetween + 1);    // bound >= 1
 
                     LocalDate randomDate = minDate.plusDays(offset);
                     int hour    = rand.nextInt(24);

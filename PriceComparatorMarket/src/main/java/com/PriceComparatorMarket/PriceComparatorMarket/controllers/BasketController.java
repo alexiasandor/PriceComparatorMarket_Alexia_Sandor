@@ -32,7 +32,7 @@ public class BasketController {
         return ResponseEntity.ok(basket);
     }
 
-    @GetMapping("/{id}/optimize")
+    @GetMapping("/optimize/{id}")
     public ResponseEntity<String> optimizeBasket(@PathVariable int id) {
         String message = basketService.optimizeBasket(id);
         return ResponseEntity.ok(message);

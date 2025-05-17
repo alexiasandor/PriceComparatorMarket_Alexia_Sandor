@@ -154,10 +154,11 @@ public class ProductService {
     }
 
     /**
-     * This method
+     * This Retrieves a list of all products matching the given product name and calculates
+     *  * the price per unit for each of them
      *
      * @param pricePerUnitRequest request which contain the name of product
-     * @return List of products with price per unit
+     * @return string with list of products with price per unit
      */
     public String getPricePerUnit(PricePerUnitRequest pricePerUnitRequest) {
 
@@ -178,6 +179,12 @@ public class ProductService {
         return result;
     }
 
+    /**
+     *  This method updates the price of a specific product
+     * @param productPriceUpdateRequest a request object containing the product name, brand,
+     *  * store name, reference date, and new price
+     * @return a message indicating whether the price update was successful or if the product was not found
+     */
     public String updatePrice(ProductPriceUpdateRequest productPriceUpdateRequest){
         LocalDate referenceDate = resolveReferenceDate(productPriceUpdateRequest.getDate());
 

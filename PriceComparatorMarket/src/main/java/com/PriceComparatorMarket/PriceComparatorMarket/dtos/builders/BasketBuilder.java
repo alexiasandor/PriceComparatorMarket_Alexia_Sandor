@@ -2,13 +2,17 @@ package com.PriceComparatorMarket.PriceComparatorMarket.dtos.builders;
 
 import com.PriceComparatorMarket.PriceComparatorMarket.dtos.BasketDto;
 import com.PriceComparatorMarket.PriceComparatorMarket.entities.Basket;
+import com.PriceComparatorMarket.PriceComparatorMarket.entities.Product;
+
+import java.time.LocalDate;
+import java.util.List;
 
 public class BasketBuilder {
-    public static Basket fromDtoToEntity(BasketDto basketDto) {
+    public static Basket buildBasket(LocalDate date, List<Product> products, float totalPrice) {
         return Basket.builder()
-                .basketId(basketDto.getBasketId())
-                .date(basketDto.getDate())
-                .productList(basketDto.getProductList())
+                .date(date)
+                .basketPrice(totalPrice)
+                .productList(products)
                 .build();
     }
 
