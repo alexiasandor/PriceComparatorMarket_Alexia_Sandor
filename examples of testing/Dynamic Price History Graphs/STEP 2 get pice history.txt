@@ -1,0 +1,6 @@
+{
+  "productName": "lapte zuzu",
+  "brand": null,
+  "storeName": null,
+  "productCategory": null
+}

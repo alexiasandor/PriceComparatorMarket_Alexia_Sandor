@@ -1,0 +1,8 @@
+{
+  "productName": "lapte zuzu",
+  "brand": "Zuzu",
+  "targetPrice": 6.50,
+  "userId": 802
+}
+
+// modificati id-ul userului dupa caz

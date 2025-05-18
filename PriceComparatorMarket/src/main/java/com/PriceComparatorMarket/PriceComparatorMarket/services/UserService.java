@@ -19,10 +19,11 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public String insert(UserDto userDto){
+    public UserDto insert(UserDto userDto){
         User createdUser = UserBuilder.fromDtoToEntity(userDto);
         createdUser = userRepository.save(createdUser);
-        return "Successfully inserted";
+        return UserBuilder.fromEntityToDto(createdUser);
+
     }
 
     public List<String> getUserMessage(int userId){

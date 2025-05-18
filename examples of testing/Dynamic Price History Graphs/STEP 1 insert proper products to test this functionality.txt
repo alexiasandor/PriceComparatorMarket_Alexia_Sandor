@@ -1,0 +1,79 @@
+
+  {
+    "productId": "P301",
+    "productName": "lapte zuzu",
+    "productCategory": "lactate",
+    "brand": "Zuzu",
+    "packageQuantity": 1.0,
+    "packageUnit": "l",
+    "price": 11.5,
+    "currency": "RON",
+    "storeName": "kaufland",
+    "date": "2025-05-01"
+  }
+
+  {
+    "productId": "P302",
+    "productName": "lapte zuzu",
+    "productCategory": "lactate",
+    "brand": "Zuzu",
+    "packageQuantity": 1.0,
+    "packageUnit": "l",
+    "price": 12.0,
+    "currency": "RON",
+    "storeName": "mega image",
+    "date": "2025-05-01"
+  }
+
+  {
+    "productId": "P303",
+    "productName": "lapte pilos",
+    "productCategory": "lactate",
+    "brand": "Pilos",
+    "packageQuantity": 1.0,
+    "packageUnit": "l",
+    "price": 10.5,
+    "currency": "RON",
+    "storeName": "lidl",
+    "date": "2025-05-01"
+  }
+
+  {
+    "productId": "P304",
+    "productName": "iaurt zuzu",
+    "productCategory": "lactate",
+    "brand": "Zuzu",
+    "packageQuantity": 0.4,
+    "packageUnit": "kg",
+    "price": 5.0,
+    "currency": "RON",
+    "storeName": "carrefour",
+    "date": "2025-05-01"
+  }
+
+  {
+    "productId": "P305",
+    "productName": "lapte bio",
+    "productCategory": "lactate",
+    "brand": "Alpro",
+    "packageQuantity": 1.0,
+    "packageUnit": "l",
+    "price": 15.0,
+    "currency": "RON",
+    "storeName": "kaufland",
+    "date": "2025-05-01"
+  }
+
+  {
+    "productId": "P306",
+    "productName": "lapte zuzu degresat",
+    "productCategory": "lactate",
+    "brand": "Zuzu",
+    "packageQuantity": 1.0,
+    "packageUnit": "l",
+    "price": 11.0,
+    "currency": "RON",
+    "storeName": "kaufland",
+    "date": "2025-05-01"
+  }
+

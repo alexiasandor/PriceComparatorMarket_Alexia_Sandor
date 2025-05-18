@@ -36,8 +36,8 @@ public class PriceAlertService {
 
         PriceAlert newAlert = PriceAlertBuilder.fromDtoToEntity(priceAlertRequestDto, user);
         priceAlertRepository.save(newAlert);
-        return "An alert has been created for the user "+ user.getUserName()
-                + "for the product "+ priceAlertRequestDto.getProductName();
+        return "An alert has been created by "+ user.getUserName()
+                + " for the product "+ priceAlertRequestDto.getProductName();
     }
 
 

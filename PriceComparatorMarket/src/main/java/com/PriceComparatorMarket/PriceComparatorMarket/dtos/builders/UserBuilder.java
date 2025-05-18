@@ -14,5 +14,12 @@ public class UserBuilder {
                 .build();
     }
 
+    public static UserDto fromEntityToDto(User user) {
+        return UserDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .messageFromAlerts(user.getMessageFromAlerts())
+                .build();
+    }
 
 }

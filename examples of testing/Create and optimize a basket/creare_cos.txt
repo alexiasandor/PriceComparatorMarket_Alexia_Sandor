@@ -1,0 +1,15 @@
+{
+  "date": "2025-05-2",
+  "productList": [
+    {
+      "productName": "lapte",
+      "brand": "Zuzu",
+      "storeName": "lidl"
+    },
+    {
+      "productName": "biscuiți cu unt",
+      "brand": "RoStar",
+      "storeName": "profi"
+    }
+  ]
+}

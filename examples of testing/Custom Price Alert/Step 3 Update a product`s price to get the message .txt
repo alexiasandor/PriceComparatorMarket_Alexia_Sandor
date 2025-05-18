@@ -1,0 +1,7 @@
+{
+  "productName": "lapte zuzu",
+  "brand": "Zuzu",
+  "storeName": "profi",
+  "date": "2025-05-02",
+  "newPrice": 6.49
+}

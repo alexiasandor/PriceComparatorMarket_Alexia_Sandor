@@ -1,0 +1,13 @@
+{
+  "productId": "P011",
+  "productName": "pâine albă",
+  "brand": "Lidl",
+  "packageQuantity": 500.0,
+  "packageUnit": "g",
+  "productCategory": "panificație",
+  "fromDate": "2025-05-11",
+  "toDate": "2025-05-25",
+  "percentageOfDiscount": 10,
+  "storeName": "profi",
+  "creationDay": "2025-08-10T11:30:00"
+}

@@ -18,8 +18,8 @@ public class UserController {
     }
 
     @PostMapping("/insert")
-    public ResponseEntity<String> insertUser(@RequestBody UserDto userDto){
-        String result = userService.insert(userDto);
+    public ResponseEntity<UserDto> insertUser(@RequestBody UserDto userDto){
+        UserDto result = userService.insert(userDto);
         return ResponseEntity.ok(result);
     }
     @GetMapping("/getMessage/{id}")
